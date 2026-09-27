@@ -602,8 +602,21 @@
         });
       }, { threshold: 0.6, rootMargin: "-10% 0px -20% 0px" });
       
-      // Only observe on mobile so it doesn't mess with desktop logic
+      const processSectionMobile = document.getElementById('process');
+      const mobileLineFill = document.getElementById('mobile-process-line-fill');
+      
       if (window.innerWidth <= 768) {
         document.querySelectorAll('.graph-node').forEach(n => mobileProcessIO.observe(n));
+        
+        window.addEventListener('scroll', () => {
+          if (!processSectionMobile || !mobileLineFill) return;
+          const rect = processSectionMobile.getBoundingClientRect();
+          const maxScroll = rect.height - window.innerHeight;
+          if (maxScroll <= 0) return;
+          
+          let progress = -rect.top / maxScroll;
+          progress = Math.max(0, Math.min(1, progress));
+          mobileLineFill.style.height = (progress * 100) + '%';
+        }, { passive: true });
       }
     })();
