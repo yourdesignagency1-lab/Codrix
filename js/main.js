@@ -591,30 +591,9 @@
       if (btnAccept) btnAccept.addEventListener('click', () => hideBanner('accepted'));
       if (btnReject) btnReject.addEventListener('click', () => hideBanner('rejected'));
 
-      /* MOBILE PROCESS TIMELINE ANIMATION */
-      const mobileProcessIO = new IntersectionObserver(entries => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('active-mobile');
-          } else {
-            e.target.classList.remove('active-mobile');
-          }
-        });
-      }, { threshold: 0.6, rootMargin: "-10% 0px -20% 0px" });
-      
       const processSectionMobile = document.getElementById('process');
       const mobileLineFill = document.getElementById('mobile-process-line-fill');
-      
-      const initMobileProcess = () => {
-        if (window.innerWidth <= 768) {
-          document.querySelectorAll('.graph-node').forEach(n => mobileProcessIO.observe(n));
-        } else {
-          document.querySelectorAll('.graph-node').forEach(n => mobileProcessIO.unobserve(n));
-        }
-      };
-      
-      window.addEventListener('resize', initMobileProcess, { passive: true });
-      initMobileProcess();
+      const processNodesList = document.querySelectorAll('.graph-node');
       
       window.addEventListener('scroll', () => {
         if (window.innerWidth > 768) return;
@@ -628,5 +607,16 @@
         let progress = -rect.top / maxScroll;
         progress = Math.max(0, Math.min(1, progress));
         mobileLineFill.style.height = (progress * 100) + '%';
+        
+        // Use scroll progress to activate nodes sequentially instead of IntersectionObserver
+        processNodesList.forEach((node, index) => {
+          // Calculate an artificial trigger point based on node index
+          const triggerProgress = (index + 1) * 0.25; 
+          if (progress >= triggerProgress) {
+            node.classList.add('active-mobile');
+          } else {
+            node.classList.remove('active-mobile');
+          }
+        });
       }, { passive: true });
     })();

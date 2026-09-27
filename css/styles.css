@@ -1507,14 +1507,6 @@
     }
 
     @media (max-width: 768px) {
-      .process-graph-section {
-        height: auto;
-      }
-      .process-sticky-wrapper {
-        position: relative;
-        height: auto;
-        padding: 60px 0;
-      }
       .graph-svg {
         display: none;
       }
