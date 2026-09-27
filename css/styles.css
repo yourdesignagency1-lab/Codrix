@@ -2503,7 +2503,7 @@
       /* Process Graph - Desktop Parity on Mobile */
       .process-graph-section { height: 150vh !important; }
       .process-sticky-wrapper { position: sticky !important; top: 0 !important; height: 100vh !important; display: flex !important; flex-direction: column !important; justify-content: center !important; overflow: hidden !important; padding: 0 !important; }
-      .wrap-broad { padding: 0 10px !important; aspect-ratio: 10 / 8 !important; height: auto !important; max-height: none !important; margin: 0 auto !important; position: relative !important; }
+      .wrap-broad { padding: 0 10px !important; height: 80vw !important; max-height: 500px !important; margin: 0 auto !important; position: relative !important; align-self: center !important; }
       
       .node-dropline { display: none !important; }
       .node-text { position: absolute !important; padding: 0 !important; width: 130px !important; }
