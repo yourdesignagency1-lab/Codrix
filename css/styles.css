@@ -2099,7 +2099,7 @@
       border-color: #fff;
     }
     .consent-label input[type="checkbox"]:checked::after {
-      content: '✓';
+      content: 'âœ“';
       position: absolute;
       top: 50%;
       left: 50%;
@@ -2475,7 +2475,7 @@
       /* Layout Padding */
       .wrap, .wrap-broad { padding: 0 20px !important; }
       
-      /* HERO � Maximize impact */
+      /* HERO — Maximize impact */
       .hero-we-are { top: 100px !important; left: 20px !important; font-size: 14px !important; letter-spacing: 4px !important; }
       .hero-massive-word { font-size: clamp(48px, 15vw, 120px) !important; letter-spacing: -2px !important; }
       .hero-image-wrapper { max-width: 85% !important; border-radius: 12px !important; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
@@ -2609,7 +2609,7 @@
       .footer-legal { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
     }
     
-    /* Tablet only (769�1024px) */
+    /* Tablet only (769–1024px) */
     @media (min-width: 769px) and (max-width: 1024px) {
       .hero-massive-word { font-size: clamp(72px, 12vw, 180px) !important; }
       .work-card { width: clamp(240px, 40vw, 380px) !important; }
