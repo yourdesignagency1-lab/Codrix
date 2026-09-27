@@ -425,27 +425,41 @@
     }
 
     #mobile-menu {
-      display: none;
       position: fixed;
       inset: 0;
       z-index: 190;
-      background: var(--paper);
-      padding: 100px 36px 40px;
+      background: rgba(17, 17, 17, 0.7);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      padding: 120px 36px 40px;
+      display: flex;
       flex-direction: column;
-      gap: 0;
+      gap: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-20px);
+      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     #mobile-menu.open {
-      display: flex;
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
     }
 
     #mobile-menu a {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 700;
       color: var(--ink);
+      text-decoration: none;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 20px 0;
+      padding: 24px 0;
+      transition: color 0.3s ease;
+    }
+    
+    #mobile-menu a:hover {
+      color: var(--blue);
     }
 
     /* HERO (Scroll Track) */
@@ -2448,89 +2462,98 @@
     #scroll-top.show {
       opacity: 1;
       pointer-events: auto;
-      transform: translateY(0);
-    }
-
-    #scroll-top:hover {
-      background: var(--blue);
-    }
-
-    #scroll-top svg {
-      stroke: var(--paper);
-      transition: stroke 0.3s;
-    }
-
-    #scroll-top:hover svg {
-      stroke: #fff;
-    }
-
     /* ====================================================
-       MOBILE FIXES (max-width: 768px)
-       All sticky sections + animations preserved.
-       Only fixing font overflow and grid layouts.
+       MOBILE OVERRIDES (ULTRA-PREMIUM)
     ==================================================== */
     @media (max-width: 768px) {
-
       html, body { overflow-x: hidden !important; }
 
       /* Hide custom cursor on touch */
-      .cursor-dot, .cursor-outline { display: none !important; }
+      .cursor-dot, .cursor-outline, .cursor-torch { display: none !important; }
       body { cursor: auto !important; }
 
-      /* HERO — keep 320vh + sticky. Just fix font overflow */
-      .hero-we-are { top: 85px !important; left: 5% !important; }
-      .hero-massive-word { font-size: clamp(44px, 16.5vw, 280px) !important; }
+      /* Layout Padding */
+      .wrap, .wrap-broad { padding: 0 20px !important; }
+      
+      /* HERO � Maximize impact */
+      .hero-we-are { top: 100px !important; left: 20px !important; font-size: 14px !important; letter-spacing: 4px !important; }
+      .hero-massive-word { font-size: clamp(48px, 15vw, 120px) !important; letter-spacing: -2px !important; }
+      .hero-image-wrapper { max-width: 85% !important; border-radius: 12px !important; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
       .hero-footer-bar {
         flex-direction: column !important;
         align-items: flex-start !important;
-        gap: 16px !important;
-        bottom: 24px !important;
+        gap: 20px !important;
+        bottom: 30px !important;
+        left: 20px !important;
+        right: 20px !important;
       }
-      .hero-disclaimer { max-width: 100% !important; font-size: 11px !important; }
+      .hero-stat-line { font-size: 12px !important; }
+      .hero-disclaimer { max-width: 100% !important; font-size: 13px !important; opacity: 0.8; }
 
-      /* Manifesto: transparent so hero video shows through */
+      /* Manifesto */
       .manifesto-overlay { background: transparent !important; }
-      #manifesto { padding: 60px 0 !important; }
-      .manifesto-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
-      .manifesto-statement { font-size: clamp(22px, 6vw, 32px) !important; }
+      #manifesto { padding: 80px 0 60px 0 !important; }
+      .manifesto-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+      .manifesto-statement { font-size: clamp(26px, 7.5vw, 40px) !important; line-height: 1.1 !important; letter-spacing: -1px; }
       .manifesto-stats {
         border-left: none !important; border-top: 1px solid var(--line) !important;
-        padding-left: 0 !important; padding-top: 28px !important;
-        grid-template-columns: 1fr 1fr !important; gap: 20px !important;
+        padding-left: 0 !important; padding-top: 40px !important;
+        grid-template-columns: 1fr 1fr !important; gap: 32px 24px !important;
       }
-      .trust-num { font-size: 36px !important; }
-      .trust-suffix { font-size: 22px !important; }
+      .trust-num { font-size: 42px !important; font-weight: 800 !important; letter-spacing: -1px; }
+      .trust-suffix { font-size: 24px !important; color: var(--blue) !important; }
+      .trust-label { font-size: 12px !important; opacity: 0.7; }
 
-      /* Core Skills — keep animation, just reflow layout */
-      .core-skills-section { padding: 60px 0 !important; }
-      .skills-headline { font-size: 10.5vw !important; margin-bottom: 32px !important; }
-      .skills-layout { flex-direction: column !important; align-items: center !important; }
+      /* Core Skills */
+      .core-skills-section { padding: 80px 0 !important; }
+      .skills-headline { font-size: 12vw !important; margin-bottom: 40px !important; letter-spacing: -2px; }
+      .skills-layout { flex-direction: column !important; align-items: stretch !important; }
       .skills-side {
-        position: relative !important; top: auto !important;
-        left: auto !important; right: auto !important;
-        transform: none !important; width: 90% !important;
-        text-align: center !important; font-size: 13px !important; margin-bottom: 18px !important;
+        position: relative !important; top: auto !important; left: auto !important; right: auto !important; transform: none !important; width: 100% !important;
+        text-align: left !important; font-size: 14px !important; margin-bottom: 24px !important; opacity: 0.6;
       }
-      .skills-center { padding: 14px 0 !important; }
-      .skill-row { font-size: 8vw !important; padding: 13px 0 !important; }
-      .skill-row.active { font-size: 10vw !important; padding: 18px 0 !important; }
-      .skill-image-wrapper { height: 10vw !important; }
-      .skill-row.active .skill-image-wrapper { width: 14vw !important; }
+      .skills-center { padding: 0 !important; }
+      .skill-row { font-size: 10vw !important; padding: 16px 0 !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
+      .skill-row.active { font-size: 11vw !important; padding: 20px 0 !important; color: var(--blue) !important; }
+      .skill-image-wrapper { height: 12vw !important; border-radius: 8px !important; }
+      .skill-row.active .skill-image-wrapper { width: 16vw !important; }
 
-      /* Work Carousel — keep 350vh sticky + JS scroll animation */
-      .work-track { height: 55vh !important; min-height: 300px !important; }
-      .work-card { width: clamp(200px, 75vw, 320px) !important; }
-      .section-head { flex-direction: column !important; gap: 8px !important; margin-bottom: 20px !important; }
-      .section-head h2 { font-size: clamp(22px, 5.5vw, 32px) !important; }
-      .section-head p { font-size: 13px !important; }
+      /* Work Carousel Native Scroll Override */
+      #work { height: auto !important; padding: 80px 0 !important; }
+      .work-sticky { position: relative !important; top: 0 !important; height: auto !important; transform: none !important; }
+      .work-track { 
+        height: auto !important; 
+        display: flex !important; 
+        overflow-x: auto !important; 
+        scroll-snap-type: x mandatory; 
+        gap: 20px !important; 
+        padding: 20px !important; 
+        -webkit-overflow-scrolling: touch;
+      }
+      .work-track::-webkit-scrollbar { display: none; }
+      .work-card { 
+        position: relative !important; 
+        transform: none !important; 
+        flex: 0 0 85vw !important; 
+        height: 60vh !important; 
+        scroll-snap-align: center; 
+        opacity: 1 !important; 
+        filter: none !important;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      }
+      .section-head { flex-direction: column !important; gap: 12px !important; margin-bottom: 30px !important; }
+      .section-head h2 { font-size: clamp(28px, 8vw, 40px) !important; letter-spacing: -1px; }
+      .section-head p { font-size: 14px !important; opacity: 0.8; }
 
       /* Skills Bento Grid */
-      #skills { padding: 60px 0 !important; }
-      .skills-grid { grid-template-columns: 1fr !important; }
+      #skills { padding: 80px 0 !important; }
+      .skills-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
       .skill-card:nth-child(1), .skill-card:nth-child(4), .skill-card:nth-child(5) { grid-column: span 1 !important; }
-      .skill-card { padding: 24px 18px !important; }
+      .skill-card { padding: 32px 24px !important; border: 1px solid rgba(255,255,255,0.05) !important; background: rgba(255,255,255,0.02) !important; }
+      .skill-card h3 { font-size: 24px !important; margin-bottom: 12px !important; }
+      .skill-card p { font-size: 14px !important; opacity: 0.7; }
 
-      /* Process Graph — keep 300vh sticky + JS draw animation */
+      /* Process Graph */
       .wrap-broad { padding: 0 8px !important; }
       .node-text h3 { font-size: 12px !important; }
       .node-text p { font-size: 10px !important; }
@@ -2538,21 +2561,55 @@
       .graph-y-axis { font-size: 8px !important; }
       .graph-x-axis { font-size: 8px !important; }
 
-      /* Journal */
-      #journal { padding: 60px 0 !important; }
-      .journal-grid { grid-template-columns: 1fr !important; }
+      /* Journal Carousel */
+      #journal { padding: 80px 0 !important; }
+      .journal-grid { 
+        display: flex !important; 
+        overflow-x: auto !important; 
+        scroll-snap-type: x mandatory; 
+        gap: 20px !important; 
+        padding-bottom: 20px !important;
+        margin: 0 -20px;
+        padding: 0 20px 20px 20px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .journal-grid::-webkit-scrollbar { display: none; }
+      .journal-card { 
+        flex: 0 0 85vw !important; 
+        scroll-snap-align: center;
+        transform: none !important; 
+        opacity: 1 !important;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.05);
+      }
+      .journal-thumb { height: 220px !important; }
+      .journal-body { padding: 24px !important; }
+      .journal-body h3 { font-size: 20px !important; margin: 12px 0; }
+      .journal-body p { font-size: 14px !important; opacity: 0.7; }
 
       /* FAQ */
-      .faq-layout { grid-template-columns: 1fr !important; }
+      #faq { padding: 80px 0 !important; }
+      .faq-layout { grid-template-columns: 1fr !important; gap: 40px !important; }
+      .faq-q { padding: 24px 0 !important; font-size: 18px !important; }
+      .faq-q svg { width: 18px !important; height: 18px !important; }
+      .faq-a-inner { font-size: 14px !important; padding-bottom: 24px !important; opacity: 0.7; }
 
       /* Contact */
-      .contact-band { grid-template-columns: 1fr !important; padding: 32px 18px !important; }
+      #contact { padding: 80px 0 !important; }
+      .contact-band { grid-template-columns: 1fr !important; padding: 40px 24px !important; border-radius: 16px !important; }
+      .contact-info h2 { font-size: 32px !important; letter-spacing: -1px; }
+      .contact-info-item span { font-size: 15px !important; }
+      .contact-form-wrap { padding: 32px 24px !important; }
 
       /* Footer */
-      .footer-top { grid-template-columns: 1fr !important; }
+      .footer-top { grid-template-columns: 1fr !important; gap: 40px !important; }
+      .footer-brand p { font-size: 14px !important; max-width: 280px !important; opacity: 0.6; }
+      .footer-col h5 { font-size: 12px !important; letter-spacing: 1px !important; }
+      .footer-col a { font-size: 16px !important; padding: 6px 0 !important; }
+      .footer-legal { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
     }
-
-    /* Tablet only (769–1024px) */
+    
+    /* Tablet only (769�1024px) */
     @media (min-width: 769px) and (max-width: 1024px) {
       .hero-massive-word { font-size: clamp(72px, 12vw, 180px) !important; }
       .work-card { width: clamp(240px, 40vw, 380px) !important; }
