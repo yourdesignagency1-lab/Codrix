@@ -605,18 +605,28 @@
       const processSectionMobile = document.getElementById('process');
       const mobileLineFill = document.getElementById('mobile-process-line-fill');
       
-      if (window.innerWidth <= 768) {
-        document.querySelectorAll('.graph-node').forEach(n => mobileProcessIO.observe(n));
+      const initMobileProcess = () => {
+        if (window.innerWidth <= 768) {
+          document.querySelectorAll('.graph-node').forEach(n => mobileProcessIO.observe(n));
+        } else {
+          document.querySelectorAll('.graph-node').forEach(n => mobileProcessIO.unobserve(n));
+        }
+      };
+      
+      window.addEventListener('resize', initMobileProcess, { passive: true });
+      initMobileProcess();
+      
+      window.addEventListener('scroll', () => {
+        if (window.innerWidth > 768) return;
+        if (!processSectionMobile || !mobileLineFill) return;
         
-        window.addEventListener('scroll', () => {
-          if (!processSectionMobile || !mobileLineFill) return;
-          const rect = processSectionMobile.getBoundingClientRect();
-          const maxScroll = rect.height - window.innerHeight;
-          if (maxScroll <= 0) return;
-          
-          let progress = -rect.top / maxScroll;
-          progress = Math.max(0, Math.min(1, progress));
-          mobileLineFill.style.height = (progress * 100) + '%';
-        }, { passive: true });
-      }
+        const rect = processSectionMobile.getBoundingClientRect();
+        const maxScroll = rect.height - window.innerHeight;
+        
+        if (maxScroll <= 0) return;
+        
+        let progress = -rect.top / maxScroll;
+        progress = Math.max(0, Math.min(1, progress));
+        mobileLineFill.style.height = (progress * 100) + '%';
+      }, { passive: true });
     })();
