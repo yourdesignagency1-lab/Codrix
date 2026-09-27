@@ -590,4 +590,20 @@
       const btnReject = document.getElementById('cookie-reject');
       if (btnAccept) btnAccept.addEventListener('click', () => hideBanner('accepted'));
       if (btnReject) btnReject.addEventListener('click', () => hideBanner('rejected'));
+
+      /* MOBILE PROCESS TIMELINE ANIMATION */
+      const mobileProcessIO = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('active-mobile');
+          } else {
+            e.target.classList.remove('active-mobile');
+          }
+        });
+      }, { threshold: 0.6, rootMargin: "-10% 0px -20% 0px" });
+      
+      // Only observe on mobile so it doesn't mess with desktop logic
+      if (window.innerWidth <= 768) {
+        document.querySelectorAll('.graph-node').forEach(n => mobileProcessIO.observe(n));
+      }
     })();
