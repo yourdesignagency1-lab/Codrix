@@ -332,11 +332,19 @@
       const processTorchCore = document.getElementById('process-torch-core');
       
       if (processSection && processCurve) {
-        const pathLength = processCurve.getTotalLength();
+        let pathLength = 0;
+        try {
+          pathLength = processCurve.getTotalLength();
+        } catch (e) {
+          // Fallback if SVG is not rendered
+        }
+        
         processCurve.style.strokeDasharray = pathLength;
         processCurve.style.strokeDashoffset = pathLength;
         
         window.addEventListener('scroll', () => {
+          if (window.innerWidth <= 768) return; // Disable desktop logic on mobile
+          
           const rect = processSection.getBoundingClientRect();
           const maxScroll = rect.height - window.innerHeight;
           
@@ -348,14 +356,16 @@
           processCurve.style.strokeDashoffset = pathLength * (1 - progress);
           
           if (processTorch && processTorchCore) {
-            const pt = processCurve.getPointAtLength(pathLength * progress);
-            const xPct = (pt.x / 1000) * 100;
-            const yPct = (pt.y / 600) * 100;
-            
-            processTorch.style.left = `${xPct}%`;
-            processTorch.style.top = `${yPct}%`;
-            processTorchCore.style.left = `${xPct}%`;
-            processTorchCore.style.top = `${yPct}%`;
+            try {
+              const pt = processCurve.getPointAtLength(pathLength * progress);
+              const xPct = (pt.x / 1000) * 100;
+              const yPct = (pt.y / 600) * 100;
+              
+              processTorch.style.left = `${xPct}%`;
+              processTorch.style.top = `${yPct}%`;
+              processTorchCore.style.left = `${xPct}%`;
+              processTorchCore.style.top = `${yPct}%`;
+            } catch(e) {}
             
             if (progress > 0.01 && progress < 0.99 && window.innerWidth > 768) {
               processTorch.style.opacity = 1;
