@@ -343,8 +343,6 @@
         processCurve.style.strokeDashoffset = pathLength;
         
         window.addEventListener('scroll', () => {
-          if (window.innerWidth <= 768) return; // Disable desktop logic on mobile
-          
           const rect = processSection.getBoundingClientRect();
           const maxScroll = rect.height - window.innerHeight;
           
@@ -367,7 +365,7 @@
               processTorchCore.style.top = `${yPct}%`;
             } catch(e) {}
             
-            if (progress > 0.01 && progress < 0.99 && window.innerWidth > 768) {
+            if (progress > 0.01 && progress < 0.99) {
               processTorch.style.opacity = 1;
               processTorchCore.style.opacity = 1;
             } else {
@@ -376,16 +374,14 @@
             }
           }
           
-          if (window.innerWidth > 768) {
-            processNodes.forEach(node => {
-              const triggerProgress = parseFloat(node.getAttribute('data-progress'));
-              if (progress >= triggerProgress) {
-                node.classList.add('active');
-              } else {
-                node.classList.remove('active');
-              }
-            });
-          }
+          processNodes.forEach(node => {
+            const triggerProgress = parseFloat(node.getAttribute('data-progress'));
+            if (progress >= triggerProgress) {
+              node.classList.add('active');
+            } else {
+              node.classList.remove('active');
+            }
+          });
         }, {passive: true});
       }
 
@@ -601,32 +597,4 @@
       if (btnAccept) btnAccept.addEventListener('click', () => hideBanner('accepted'));
       if (btnReject) btnReject.addEventListener('click', () => hideBanner('rejected'));
 
-      const processSectionMobile = document.getElementById('process');
-      const mobileLineFill = document.getElementById('mobile-process-line-fill');
-      const processNodesList = document.querySelectorAll('.graph-node');
-      
-      window.addEventListener('scroll', () => {
-        if (window.innerWidth > 768) return;
-        if (!processSectionMobile || !mobileLineFill) return;
-        
-        const rect = processSectionMobile.getBoundingClientRect();
-        const maxScroll = rect.height - window.innerHeight;
-        
-        if (maxScroll <= 0) return;
-        
-        let progress = -rect.top / maxScroll;
-        progress = Math.max(0, Math.min(1, progress));
-        mobileLineFill.style.height = (progress * 100) + '%';
-        
-        // Use scroll progress to activate nodes sequentially instead of IntersectionObserver
-        processNodesList.forEach((node, index) => {
-          // Calculate an artificial trigger point based on node index
-          const triggerProgress = (index + 1) * 0.25; 
-          if (progress >= triggerProgress) {
-            node.classList.add('active-mobile');
-          } else {
-            node.classList.remove('active-mobile');
-          }
-        });
-      }, { passive: true });
     })();
