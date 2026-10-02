@@ -2866,7 +2866,7 @@
       /* HERO — Maximize impact */
       .hero-we-are { top: 100px !important; left: 20px !important; font-size: 14px !important; letter-spacing: 4px !important; }
       .hero-massive-word { font-size: clamp(48px, 15vw, 120px) !important; letter-spacing: -2px !important; }
-      .hero-image-wrapper { max-width: 85% !important; border-radius: 12px !important; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+      /* Let JS handle .hero-image-wrapper sizing entirely for the scroll animation */
       .hero-footer-bar {
         flex-direction: column !important;
         align-items: flex-start !important;
