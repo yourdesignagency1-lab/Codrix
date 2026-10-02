@@ -100,15 +100,27 @@
             if (!ctx) return;
 
             let width = 0, height = 0, dpr = 1;
-            const cols = 150, rows = 75;
-            const spacingX = 18, spacingZ = 18;
+            const cols = 160, rows = 80;
 
             let mouseX = 0, mouseY = 0, targetMouseX = 0, targetMouseY = 0, isMouseOver = false;
             const blueDotSet = new Set();
             const totalPoints = cols * rows;
             let seed = 1337;
             function pseudoRandom() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
-            for (let i = 0; i < Math.floor(totalPoints * 0.045); i++) { blueDotSet.add(Math.floor(pseudoRandom() * totalPoints)); }
+            for (let i = 0; i < Math.floor(totalPoints * 0.05); i++) { blueDotSet.add(Math.floor(pseudoRandom() * totalPoints)); }
+
+            // Ambient background floating starburst dots across full screen
+            const ambientDots = [];
+            for (let i = 0; i < 90; i++) {
+              ambientDots.push({
+                xRatio: pseudoRandom() * 1.4 - 0.2,
+                yRatio: pseudoRandom() * 1.2 - 0.1,
+                size: 0.6 + pseudoRandom() * 1.8,
+                speed: 0.2 + pseudoRandom() * 0.6,
+                isBlue: pseudoRandom() < 0.35,
+                phase: pseudoRandom() * Math.PI * 2
+              });
+            }
 
             function resize() {
               width = window.innerWidth;
@@ -140,36 +152,61 @@
               mouseY += (targetMouseY - mouseY) * 0.05;
               ctx.clearRect(0, 0, width, height);
 
-              const fov = 420;
+              // 1. Ambient Floating Starburst Dots across full background space
+              for (let i = 0; i < ambientDots.length; i++) {
+                const ad = ambientDots[i];
+                const pulse = 0.5 + Math.sin(time * ad.speed + ad.phase) * 0.5;
+                const ax = ad.xRatio * width + Math.sin(time * 0.3 + ad.phase) * 20;
+                const ay = ad.yRatio * height + Math.cos(time * 0.4 + ad.phase) * 15;
+                const alpha = Math.max(0.1, pulse * 0.65);
+
+                ctx.beginPath();
+                ctx.arc(ax, ay, ad.size, 0, Math.PI * 2);
+                if (ad.isBlue) {
+                  ctx.fillStyle = `rgba(59, 76, 255, ${alpha})`;
+                  ctx.shadowColor = 'rgba(59, 76, 255, 0.8)';
+                  ctx.shadowBlur = 6;
+                } else {
+                  ctx.fillStyle = `rgba(243, 241, 234, ${alpha * 0.7})`;
+                  ctx.shadowBlur = 0;
+                }
+                ctx.fill();
+              }
+              ctx.shadowBlur = 0;
+
+              // 2. 3D Wave Field Spanning 100% Full Viewport Width
+              const fov = 440;
               const halfCols = cols / 2;
+              const spacingX = Math.max(22, (width * 2.3) / cols);
+              const spacingZ = 20;
               const points = [];
 
               for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
                   const pointIdx = r * cols + c;
                   const posX = (c - halfCols) * spacingX;
-                  const posZ = r * spacingZ + 100;
+                  const posZ = r * spacingZ + 80;
 
-                  const wave1 = Math.sin(c * 0.10 + time * 1.1) * Math.cos(r * 0.10 + time * 0.9) * 32;
-                  const wave2 = Math.sin((c + r) * 0.06 + time * 0.7) * 16;
+                  const wave1 = Math.sin(c * 0.09 + time * 1.1) * Math.cos(r * 0.09 + time * 0.9) * 36;
+                  const wave2 = Math.sin((c + r) * 0.05 + time * 0.7) * 18;
                   let posY = wave1 + wave2;
 
                   if (isMouseOver) {
                     const dx = posX - mouseX;
                     const dz = posZ - (mouseY + 280);
                     const distSq = dx * dx + dz * dz;
-                    if (distSq < 180 * 180) {
-                      const factor = 1 - distSq / (180 * 180);
-                      posY -= Math.sin(factor * Math.PI) * 40;
+                    if (distSq < 220 * 220) {
+                      const factor = 1 - distSq / (220 * 220);
+                      posY -= Math.sin(factor * Math.PI) * 45;
                     }
                   }
 
                   const z3d = posZ + (mouseY * 0.12);
                   const scale = fov / (fov + z3d);
                   const screenX = width / 2 + (posX + mouseX * 0.15) * scale;
-                  const screenY = height * 0.54 + (posY + (r * 9) - 220) * scale;
+                  const screenY = height * 0.58 + (posY + (r * 12) - 280) * scale;
 
-                  if (screenX < -20 || screenX > width + 20 || screenY < -20 || screenY > height + 20) continue;
+                  if (screenX < -50 || screenX > width + 50 || screenY < -50 || screenY > height + 50) continue;
 
                   points.push({ x: screenX, y: screenY, scale: scale, z: z3d, isBlue: blueDotSet.has(pointIdx), idx: pointIdx });
                 }
@@ -179,12 +216,11 @@
 
               for (let i = 0; i < points.length; i++) {
                 const p = points[i];
-                const depthAlpha = Math.max(0.08, Math.min(0.85, (1600 - p.z) / 1300));
+                const depthAlpha = Math.max(0.1, Math.min(0.9, (1700 - p.z) / 1400));
 
                 if (p.isBlue) {
-                  // Codrix Signature Glowing Electric Blue Accent (#3B4CFF)
                   const pulse = 0.88 + Math.sin(time * 3.2 + p.idx) * 0.22;
-                  const radius = Math.max(1.2, p.scale * 2.2) * pulse;
+                  const radius = Math.max(1.2, p.scale * 2.4) * pulse;
                   ctx.save();
                   ctx.shadowColor = 'rgba(59, 76, 255, 0.9)';
                   ctx.shadowBlur = Math.max(5, 10 * p.scale);
@@ -194,9 +230,8 @@
                   ctx.fill();
                   ctx.restore();
                 } else {
-                  // Delicate Micro White/Cream Matrix Dot (#F3F1EA)
-                  const radius = Math.max(0.65, p.scale * 1.4);
-                  ctx.fillStyle = `rgba(243, 241, 234, ${depthAlpha * 0.45})`;
+                  const radius = Math.max(0.65, p.scale * 1.5);
+                  ctx.fillStyle = `rgba(243, 241, 234, ${depthAlpha * 0.5})`;
                   ctx.beginPath();
                   ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
                   ctx.fill();
