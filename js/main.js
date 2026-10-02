@@ -3,18 +3,20 @@
 
       /* NAV SCROLL */
       const nav = document.getElementById('nav');
-      const scrollTopBtn = document.getElementById('scroll-top');
+      const scrollTopBtn = document.getElementById('scroll-top') || document.getElementById('footer-scroll-top');
       window.addEventListener('scroll', () => {
         const y = window.scrollY;
-        nav.classList.toggle('scrolled', y > 30);
-        scrollTopBtn.classList.toggle('show', y > 600);
+        if (nav) nav.classList.toggle('scrolled', y > 30);
+        if (scrollTopBtn) scrollTopBtn.classList.toggle('show', y > 600);
       }, { passive: true });
 
       /* HAMBURGER */
       const hamburger = document.getElementById('hamburger-btn');
       const mobileMenu = document.getElementById('mobile-menu');
-      hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
-      mobileMenu.querySelectorAll('a').forEach(l => l.addEventListener('click', () => mobileMenu.classList.remove('open')));
+      if (hamburger && mobileMenu) {
+        hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+        mobileMenu.querySelectorAll('a').forEach(l => l.addEventListener('click', () => mobileMenu.classList.remove('open')));
+      }
 
       /* HERO ENTRANCE REVEAL */
       const hugeWords = document.querySelectorAll('.hero-massive-word');
@@ -598,3 +600,224 @@
       if (btnReject) btnReject.addEventListener('click', () => hideBanner('rejected'));
 
     })();
+
+    /* FRAXBIT-STYLE 3D PARTICLE MATRIX WAVE ANIMATION (ULTRA-HIGH CONTRAST & DENSITY) */
+    (function initFraxbitHeroCanvas() {
+      const canvas = document.getElementById('fraxbit-hero-canvas');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      let width = 0;
+      let height = 0;
+      let dpr = 1;
+
+      // Grid Configuration - High Density 3D Matrix
+      let cols = 140;
+      let rows = 85;
+      const spacingX = 24;
+      const spacingZ = 24;
+
+      // Camera & Perspective settings
+      const focalLength = 460;
+      let cameraY = -100;
+      let cameraZ = 10;
+      let targetRotY = 0;
+      let targetRotX = 0.32; // Pitch angle centered directly behind hero text
+      let rotY = 0;
+      let rotX = 0.32;
+
+      // Mouse interaction
+      let mouseX = 0;
+      let mouseY = 0;
+      let targetMouseX = 0;
+      let targetMouseY = 0;
+      let isMouseOverHero = false;
+
+      // Pre-seed accent red dots deterministically
+      const redDotIndices = new Set();
+      let totalPoints = cols * rows;
+
+      function generateRedDots() {
+        redDotIndices.clear();
+        totalPoints = cols * rows;
+        const redDotCount = Math.floor(totalPoints * 0.042); // ~4.2% signature red dots
+        let seed = 1337;
+        function pseudoRandom() {
+          seed = (seed * 9301 + 49297) % 233280;
+          return seed / 233280;
+        }
+        for (let i = 0; i < redDotCount; i++) {
+          const idx = Math.floor(pseudoRandom() * totalPoints);
+          redDotIndices.add(idx);
+        }
+      }
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.scale(dpr, dpr);
+
+        if (width < 768) {
+          cols = 85;
+          rows = 55;
+        } else if (width < 1200) {
+          cols = 115;
+          rows = 70;
+        } else {
+          cols = 150;
+          rows = 90;
+        }
+        generateRedDots();
+      }
+
+      resize();
+      window.addEventListener('resize', resize, { passive: true });
+
+      const heroSection = document.getElementById('hero') || document.body;
+      heroSection.addEventListener('mousemove', (e) => {
+        const rect = heroSection.getBoundingClientRect();
+        const x = e.clientX - rect.left - width / 2;
+        const y = e.clientY - rect.top - height / 2;
+        targetMouseX = x;
+        targetMouseY = y;
+        targetRotY = (x / width) * 0.30; // Interactive yaw tilt
+        targetRotX = 0.44 + (y / height) * 0.18; // Interactive pitch tilt
+        isMouseOverHero = true;
+      }, { passive: true });
+
+      heroSection.addEventListener('mouseleave', () => {
+        targetRotY = 0;
+        targetRotX = 0.44;
+        isMouseOverHero = false;
+      }, { passive: true });
+
+      let time = 0;
+
+      function render() {
+        time += 0.022;
+
+        // Smooth lerp camera & mouse reactivity
+        rotY += (targetRotY - rotY) * 0.05;
+        rotX += (targetRotX - rotX) * 0.05;
+        mouseX += (targetMouseX - mouseX) * 0.06;
+        mouseY += (targetMouseY - mouseY) * 0.06;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const cosY = Math.cos(rotY);
+        const sinY = Math.sin(rotY);
+        const cosX = Math.cos(rotX);
+        const sinX = Math.sin(rotX);
+
+        const halfCols = cols / 2;
+        const halfRows = rows / 2;
+
+        const projectedPoints = [];
+
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const pointIdx = r * cols + c;
+
+            // Base grid 3D position
+            const posX = (c - halfCols) * spacingX;
+            const posZ = (r - halfRows) * spacingZ + 280; // Z offset
+
+            // 3D Superposition Wave height Y formula
+            const wave1 = Math.sin(posX * 0.009 + time * 1.2) * Math.cos(posZ * 0.009 + time * 1.0) * 44;
+            const wave2 = Math.sin((posX + posZ) * 0.006 + time * 0.8) * 22;
+            const wave3 = Math.cos(posX * 0.014 - time * 0.9) * 14;
+
+            let posY = wave1 + wave2 + wave3;
+
+            // Interactive mouse displacement ripple
+            if (isMouseOverHero) {
+              const dx = posX - mouseX * 0.95;
+              const dz = posZ - (mouseY * 0.95 + 280);
+              const distSq = dx * dx + dz * dz;
+              const radiusSq = 250 * 250;
+              if (distSq < radiusSq) {
+                const factor = (1 - distSq / radiusSq);
+                posY -= Math.sin(factor * Math.PI) * 55;
+              }
+            }
+
+            // 3D Yaw & Pitch Rotation
+            const x1 = posX * cosY - posZ * sinY;
+            const z1 = posX * sinY + posZ * cosY;
+
+            const y2 = (posY - cameraY) * cosX - (z1 - cameraZ) * sinX;
+            const z2 = (posY - cameraY) * sinX + (z1 - cameraZ) * cosX;
+
+            if (z2 < 10) continue;
+
+            // 3D to 2D Perspective Projection
+            const scale = focalLength / z2;
+            const screenX = width / 2 + x1 * scale;
+            const screenY = height / 2 + y2 * scale;
+
+            if (screenX < -30 || screenX > width + 30 || screenY < -30 || screenY > height + 30) {
+              continue;
+            }
+
+            const isRed = redDotIndices.has(pointIdx);
+            projectedPoints.push({
+              x: screenX,
+              y: screenY,
+              scale: scale,
+              z: z2,
+              isRed: isRed,
+              pointIdx: pointIdx
+            });
+          }
+        }
+
+        // Sort by depth (back to front rendering)
+        projectedPoints.sort((a, b) => b.z - a.z);
+
+        // Render particles with ultra-high contrast, bold sizing & glowing neon red accents
+        for (let i = 0; i < projectedPoints.length; i++) {
+          const p = projectedPoints[i];
+
+          // Alpha depth fading
+          const depthRatio = Math.max(0, Math.min(1, (1300 - p.z) / 1100));
+          if (depthRatio <= 0.05) continue;
+
+          if (p.isRed) {
+            // Fraxbit Signature Glowing Red Accent Dot
+            const pulse = 0.9 + Math.sin(time * 3.2 + p.pointIdx) * 0.25;
+            const radius = Math.max(2.8, p.scale * 4.8) * pulse;
+            const alpha = Math.min(1, depthRatio * 0.98);
+
+            ctx.save();
+            ctx.shadowColor = 'rgba(255, 42, 75, 1)';
+            ctx.shadowBlur = Math.max(10, 18 * p.scale);
+            ctx.fillStyle = `rgba(255, 42, 75, ${alpha})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          } else {
+            // High-contrast crisp white/cyan matrix dot
+            const radius = Math.max(1.6, p.scale * 3.4);
+            const alpha = Math.min(0.92, Math.max(0.35, depthRatio * 0.9));
+
+            ctx.fillStyle = `rgba(240, 246, 255, ${alpha})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        requestAnimationFrame(render);
+      }
+
+      requestAnimationFrame(render);
+    })();
