@@ -2864,8 +2864,9 @@
       .wrap, .wrap-broad { padding: 0 20px !important; }
       
       /* HERO — Maximize impact */
+      .hero-center-layout { height: 100svh !important; }
       .hero-we-are { top: 100px !important; left: 20px !important; font-size: 14px !important; letter-spacing: 4px !important; }
-      .hero-massive-word { font-size: clamp(48px, 15vw, 120px) !important; letter-spacing: -2px !important; }
+      .hero-massive-word { font-size: clamp(44px, 14vw, 96px) !important; letter-spacing: -2px !important; }
       /* Let JS handle .hero-image-wrapper sizing entirely for the scroll animation */
       .hero-footer-bar {
         flex-direction: column !important;
