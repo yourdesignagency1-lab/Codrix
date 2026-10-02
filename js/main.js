@@ -266,16 +266,16 @@
             const endW = window.innerWidth;
             const endH = window.innerHeight;
             
-            if (progress <= 0.2) {
-              const p1 = progress / 0.2;
+            if (progress <= 0.08) {
+              const p1 = progress / 0.08;
               const easeOut = 1 - Math.pow(1 - p1, 3);
               heroImgWrapper.style.width = `${targetW * easeOut}px`;
               heroImgWrapper.style.height = `${targetH * easeOut}px`;
               heroImgWrapper.style.borderRadius = `18px`;
               heroImgWrapper.style.transform = `translateY(0px)`;
               heroImgWrapper.style.opacity = easeOut;
-            } else if (progress <= 0.4) {
-              const p2 = (progress - 0.2) / 0.2;
+            } else if (progress <= 0.22) {
+              const p2 = (progress - 0.08) / 0.14;
               const easeOut = 1 - Math.pow(1 - p2, 3);
               heroImgWrapper.style.width = `${targetW + (endW - targetW) * easeOut}px`;
               heroImgWrapper.style.height = `${targetH + (endH - targetH) * easeOut}px`;
@@ -300,7 +300,7 @@
           }
           
           if (hugeWords.length === 2) {
-            const textProgress = Math.min(progress / 0.2, 1);
+            const textProgress = Math.min(progress / 0.08, 1);
             const textEase = textProgress * textProgress;
             hugeWords[0].style.transform = `translateY(${textEase * -350}px)`; 
             hugeWords[1].style.transform = `translateY(calc(-8% + ${textEase * 350}px))`; 
@@ -604,227 +604,326 @@
     })();
 
     /* FRAXBIT-STYLE 3D PARTICLE MATRIX WAVE ANIMATION (ULTRA-HIGH CONTRAST & DENSITY) */
-    function initFraxbitHeroCanvas() {
-      const canvas = document.getElementById('fraxbit-hero-canvas');
+    function initFraxbitCanvas(canvasId, sectionSelector, waveDirection = 1) {
+      const canvas = document.getElementById(canvasId);
       if (!canvas) return;
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      const gl = canvas.getContext('webgl', {
+          alpha: true,
+          antialias: false,
+          depth: false,
+          premultipliedAlpha: false,
+          powerPreference: "low-power"
+      });
+      if (!gl) return;
 
-      let width = 0;
-      let height = 0;
-      let dpr = 1;
+      const vertexShaderSource = `
+attribute vec2 aGrid;   // x: -1..1 across, y: 0 (near) .. 1 (far)
+attribute float aSeed;  // 0..1 per point
 
-      // Grid Configuration - High Density 3D Matrix
-      let cols = 140;
-      let rows = 85;
-      const spacingX = 24;
-      const spacingZ = 24;
+uniform mat4 uProjView;
+uniform float uTime;
+uniform float uAmp;
+uniform float uAspect;
+uniform float uDpr;
+uniform float uPointScale;
+uniform vec2 uMouse;
+uniform float uMouseStrength;
+uniform float uNearW;   // half-width of the field at the near edge
+uniform float uSpread;  // extra half-width per unit of depth (matches the lens)
+uniform float uWaveDir;
 
-      // Camera & Perspective settings
-      const focalLength = 460;
-      let cameraY = -100;
-      let cameraZ = 10;
-      let targetRotY = 0;
-      let targetRotX = 0.32; // Pitch angle centered directly behind hero text
-      let rotY = 0;
-      let rotX = 0.32;
+varying float vAlpha;
+varying float vBit;
+varying float vRipple;
+varying float vTwinkle;
+varying float vHeight;
 
-      // Mouse interaction
-      let mouseX = 0;
-      let mouseY = 0;
-      let targetMouseX = 0;
-      let targetMouseY = 0;
-      let isMouseOverHero = false;
+const float DEPTH = 12.0;
 
-      // Pre-seed accent red dots deterministically
-      const redDotIndices = new Set();
-      let totalPoints = cols * rows;
+float terrain(vec2 p, float t) {
+  // Use uWaveDir to determine wave flow direction
+  return sin(p.x * 0.8 - t * 0.5 * uWaveDir) * 0.34
+       + sin(p.y * 0.6 + t * 0.32 * uWaveDir + p.x * 0.3) * 0.42
+       + sin((p.x - p.y) * 1.7 - t * 0.75 * uWaveDir) * 0.07;
+}
 
-      function generateRedDots() {
-        redDotIndices.clear();
-        totalPoints = cols * rows;
-        const redDotCount = Math.floor(totalPoints * 0.042); // ~4.2% signature red dots
-        let seed = 1337;
-        function pseudoRandom() {
-          seed = (seed * 9301 + 49297) % 233280;
-          return seed / 233280;
-        }
-        for (let i = 0; i < redDotCount; i++) {
-          const idx = Math.floor(pseudoRandom() * totalPoints);
-          redDotIndices.add(idx);
-        }
+void main() {
+  float z = aGrid.y * DEPTH;
+  vec2 p = vec2(aGrid.x * (uNearW + z * uSpread), z);
+  float h = terrain(p, uTime) * uAmp;
+  vec4 world = vec4(p.x, h, -p.y, 1.0);
+
+  vec4 clip = uProjView * world;
+  vec2 d = (clip.xy / clip.w - uMouse) * vec2(uAspect, 1.0);
+  float dist = length(d);
+  float ripple = exp(-dist * dist * 6.0) * uMouseStrength;
+  world.y += ripple * (0.26 + 0.2 * sin(dist * 20.0 - uTime * 5.0));
+  clip = uProjView * world;
+  gl_Position = clip;
+
+  float edge = smoothstep(1.0, 0.82, abs(aGrid.x));
+  float far = smoothstep(0.62, 0.22, aGrid.y);
+  float near = smoothstep(0.0, 0.05, aGrid.y);
+  vAlpha = edge * far * near;
+
+  vBit = step(0.99, aSeed);
+  vRipple = ripple;
+  vTwinkle = 0.55 + 0.45 * sin(uTime * 2.2 + aSeed * 90.0);
+  vHeight = h;
+
+  float size = uPointScale * (1.0 + vBit * 1.6 + ripple * 1.1) / clip.w;
+  gl_PointSize = max(size, 1.0) * uDpr;
+}
+`;
+
+      const fragmentShaderSource = `
+precision mediump float;
+
+uniform vec3 uDot;
+uniform vec3 uAccent;
+uniform float uFade;
+
+varying float vAlpha;
+varying float vBit;
+varying float vRipple;
+varying float vTwinkle;
+varying float vHeight;
+
+void main() {
+  float r = length(gl_PointCoord - 0.5);
+  float disc = smoothstep(0.5, 0.3, r);
+  float light = 0.55 + clamp(vHeight, -0.6, 0.6) * 0.4 + vRipple * 0.5;
+  float alpha = disc * vAlpha * uFade * mix(light, vTwinkle, vBit);
+  vec3 color = mix(uDot, uAccent, vBit);
+  gl_FragColor = vec4(color, alpha);
+}
+`;
+
+      function compileShader(gl, type, source) {
+          const shader = gl.createShader(type);
+          gl.shaderSource(shader, source);
+          gl.compileShader(shader);
+          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+              console.error(gl.getShaderInfoLog(shader));
+              return null;
+          }
+          return shader;
+      }
+
+      const program = gl.createProgram();
+      const vs = compileShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+      const fs = compileShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+      gl.attachShader(program, vs);
+      gl.attachShader(program, fs);
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+          console.error(gl.getProgramInfoLog(program));
+          return;
+      }
+      gl.useProgram(program);
+
+      // Create Grid and Seeds
+      const isMobile = window.innerWidth <= 767;
+      const mCols = isMobile ? 110 : 220;
+      const mRows = isMobile ? 80 : 120;
+      const numPoints = mCols * mRows;
+      
+      const grids = new Float32Array(numPoints * 2);
+      const seeds = new Float32Array(numPoints);
+      
+      let idx = 0;
+      for (let y = 0; y < mRows; y++) {
+          for (let x = 0; x < mCols; x++) {
+              grids[idx * 2] = (x / (mCols - 1)) * 2 - 1; // -1 to 1
+              grids[idx * 2 + 1] = Math.pow(y / (mRows - 1), 1.45); // 0 to 1 non-linear
+              seeds[idx] = Math.random();
+              idx++;
+          }
+      }
+
+      function createBuffer(name, data, size) {
+          const buffer = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+          gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+          const loc = gl.getAttribLocation(program, name);
+          gl.enableVertexAttribArray(loc);
+          gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+          return buffer;
+      }
+
+      createBuffer("aGrid", grids, 2);
+      createBuffer("aSeed", seeds, 1);
+
+      const uniforms = {
+          projView: gl.getUniformLocation(program, "uProjView"),
+          time: gl.getUniformLocation(program, "uTime"),
+          amp: gl.getUniformLocation(program, "uAmp"),
+          aspect: gl.getUniformLocation(program, "uAspect"),
+          dpr: gl.getUniformLocation(program, "uDpr"),
+          pointScale: gl.getUniformLocation(program, "uPointScale"),
+          mouse: gl.getUniformLocation(program, "uMouse"),
+          mouseStrength: gl.getUniformLocation(program, "uMouseStrength"),
+          nearW: gl.getUniformLocation(program, "uNearW"),
+          spread: gl.getUniformLocation(program, "uSpread"),
+          dot: gl.getUniformLocation(program, "uDot"),
+          accent: gl.getUniformLocation(program, "uAccent"),
+          fade: gl.getUniformLocation(program, "uFade"),
+          waveDir: gl.getUniformLocation(program, "uWaveDir")
+      };
+
+      // Set colors to Codrix Website Electric Blue theme
+      function hexToRgb(hex) {
+          const num = parseInt(hex.replace("#", ""), 16);
+          return [(num >> 16 & 255) / 255, (num >> 8 & 255) / 255, (255 & num) / 255];
+      }
+      
+      const dotColor = hexToRgb("#ffffff");
+      const accentColor = hexToRgb("#3B4CFF"); // Codrix Electric Blue Accent
+      gl.uniform3fv(uniforms.dot, dotColor);
+      gl.uniform3fv(uniforms.accent, accentColor);
+      gl.uniform1f(uniforms.waveDir, waveDirection);
+
+      gl.enable(gl.BLEND);
+      gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      gl.clearColor(0, 0, 0, 0);
+
+      const state = {
+          amp: 1,
+          fade: 1,
+          scroll: 0,
+          mouse: { x: 0, y: -0.4, tx: 0, ty: -0.4, strength: 0, target: 0 },
+          aspect: 1,
+          proj: new Float32Array(16)
+      };
+
+      function perspective(fovy, aspect, near, far) {
+          const f = 1.0 / Math.tan(fovy / 2);
+          const nf = 1 / (near - far);
+          return new Float32Array([
+              f / aspect, 0, 0, 0,
+              0, f, 0, 0,
+              0, 0, (far + near) * nf, -1,
+              0, 0, (2 * far * near) * nf, 0
+          ]);
       }
 
       function resize() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        canvas.style.width = width + 'px';
-        canvas.style.height = height + 'px';
-        ctx.scale(dpr, dpr);
-
-        if (width < 768) {
-          cols = 85;
-          rows = 55;
-        } else if (width < 1200) {
-          cols = 115;
-          rows = 70;
-        } else {
-          cols = 150;
-          rows = 90;
-        }
-        generateRedDots();
+          const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
+          const w = canvas.parentElement.clientWidth || window.innerWidth;
+          const h = canvas.parentElement.clientHeight || window.innerHeight;
+          if (!w || !h) return;
+          canvas.width = Math.round(w * dpr);
+          canvas.height = Math.round(h * dpr);
+          gl.viewport(0, 0, canvas.width, canvas.height);
+          
+          state.aspect = w / h;
+          const fovy = state.aspect < 1 ? Math.PI / 3 : Math.PI / 5;
+          state.proj = perspective(fovy, state.aspect, 0.1, 60);
+          
+          const spread = Math.tan(fovy / 2) * state.aspect * 1.3;
+          gl.uniform1f(uniforms.spread, spread);
+          gl.uniform1f(uniforms.nearW, 2.8 * spread);
+          gl.uniform1f(uniforms.aspect, state.aspect);
+          gl.uniform1f(uniforms.dpr, dpr);
+          gl.uniform1f(uniforms.pointScale, isMobile ? 7 : 8);
       }
 
-      resize();
-      window.addEventListener('resize', resize, { passive: true });
+      function dotProduct(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+      function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+      function normalize(a) { const len = Math.hypot(...a) || 1; return [a[0] / len, a[1] / len, a[2] / len]; }
 
-      const heroSection = document.getElementById('hero') || document.body;
-      heroSection.addEventListener('mousemove', (e) => {
-        const rect = heroSection.getBoundingClientRect();
-        const x = e.clientX - rect.left - width / 2;
-        const y = e.clientY - rect.top - height / 2;
-        targetMouseX = x;
-        targetMouseY = y;
-        targetRotY = (x / width) * 0.30; // Interactive yaw tilt
-        targetRotX = 0.44 + (y / height) * 0.18; // Interactive pitch tilt
-        isMouseOverHero = true;
-      }, { passive: true });
-
-      heroSection.addEventListener('mouseleave', () => {
-        targetRotY = 0;
-        targetRotX = 0.44;
-        isMouseOverHero = false;
-      }, { passive: true });
-
-      let time = 0;
+      let startTime = performance.now();
+      
+      let isVisible = true;
+      const io = new IntersectionObserver(([e]) => {
+          isVisible = e.isIntersecting;
+      });
+      io.observe(canvas.parentElement || canvas);
 
       function render() {
-        time += 0.022;
+          if (!isVisible) {
+              requestAnimationFrame(render);
+              return;
+          }
+          const time = (performance.now() - startTime) / 1000;
+          
+          const m = state.mouse;
+          m.x += (m.tx - m.x) * 0.08;
+          m.y += (m.ty - m.y) * 0.08;
+          m.strength += (m.target - m.strength) * 0.05;
 
-        // Smooth lerp camera & mouse reactivity
-        rotY += (targetRotY - rotY) * 0.05;
-        rotX += (targetRotX - rotX) * 0.05;
-        mouseX += (targetMouseX - mouseX) * 0.06;
-        mouseY += (targetMouseY - mouseY) * 0.06;
+          const scroll = state.scroll;
+          const up = [0, 1, 0];
+          const eye = [0, 1.15 + 1.8 * scroll, 2.3 - 0.9 * scroll];
+          const center = [0, 0.35 - 1.2 * scroll, -6];
+          const zAxis = normalize([eye[0] - center[0], eye[1] - center[1], eye[2] - center[2]]);
+          const xAxis = normalize(cross(up, zAxis));
+          const yAxis = cross(zAxis, xAxis);
 
-        ctx.clearRect(0, 0, width, height);
+          const view = new Float32Array([
+              xAxis[0], yAxis[0], zAxis[0], 0,
+              xAxis[1], yAxis[1], zAxis[1], 0,
+              xAxis[2], yAxis[2], zAxis[2], 0,
+              -dotProduct(xAxis, eye), -dotProduct(yAxis, eye), -dotProduct(zAxis, eye), 1
+          ]);
 
-        const cosY = Math.cos(rotY);
-        const sinY = Math.sin(rotY);
-        const cosX = Math.cos(rotX);
-        const sinX = Math.sin(rotX);
-
-        const halfCols = cols / 2;
-        const halfRows = rows / 2;
-
-        const projectedPoints = [];
-
-        for (let r = 0; r < rows; r++) {
-          for (let c = 0; c < cols; c++) {
-            const pointIdx = r * cols + c;
-
-            // Base grid 3D position
-            const posX = (c - halfCols) * spacingX;
-            const posZ = (r - halfRows) * spacingZ; // Z offset
-
-            // 3D Superposition Wave height Y formula
-            const wave1 = Math.sin(posX * 0.009 + time * 1.2) * Math.cos(posZ * 0.009 + time * 1.0) * 44;
-            const wave2 = Math.sin((posX + posZ) * 0.006 + time * 0.8) * 22;
-            const wave3 = Math.cos(posX * 0.014 - time * 0.9) * 14;
-
-            let posY = wave1 + wave2 + wave3;
-
-            // Interactive mouse displacement ripple
-            if (isMouseOverHero) {
-              const dx = posX - mouseX * 0.95;
-              const dz = posZ - (mouseY * 0.95);
-              const distSq = dx * dx + dz * dz;
-              const radiusSq = 250 * 250;
-              if (distSq < radiusSq) {
-                const factor = (1 - distSq / radiusSq);
-                posY -= Math.sin(factor * Math.PI) * 55;
+          const projView = new Float32Array(16);
+          for (let i = 0; i < 4; i++) {
+              for (let j = 0; j < 4; j++) {
+                  projView[i * 4 + j] = 
+                      state.proj[j] * view[i * 4] + 
+                      state.proj[4 + j] * view[i * 4 + 1] + 
+                      state.proj[8 + j] * view[i * 4 + 2] + 
+                      state.proj[12 + j] * view[i * 4 + 3];
               }
-            }
-
-            // 3D Yaw & Pitch Rotation
-            const x1 = posX * cosY - posZ * sinY;
-            const z1 = posX * sinY + posZ * cosY;
-
-            const z2 = (posY - cameraY) * sinX + (z1 - cameraZ) * cosX + 450;
-            if (z2 < 20) continue;
-
-            // 3D to 2D Perspective Projection
-            const scale = focalLength / z2;
-            const screenX = width / 2 + (x1 + mouseX * 0.15) * scale;
-            const screenY = height * 0.50 + (posY + (r * 11) - 300) * scale;
-
-            if (screenX < -50 || screenX > width + 50 || screenY < -50 || screenY > height + 50) {
-              continue;
-            }
-
-            const isRed = redDotIndices.has(pointIdx);
-            projectedPoints.push({
-              x: screenX,
-              y: screenY,
-              scale: scale,
-              z: z2,
-              isRed: isRed,
-              pointIdx: pointIdx
-            });
           }
-        }
 
-        // Sort by depth (back to front rendering)
-        projectedPoints.sort((a, b) => b.z - a.z);
+          gl.uniformMatrix4fv(uniforms.projView, false, projView);
+          gl.uniform1f(uniforms.time, time);
+          gl.uniform1f(uniforms.amp, state.amp * (1 + 0.5 * scroll));
+          gl.uniform1f(uniforms.fade, state.fade * (1 - 0.6 * scroll));
+          gl.uniform2f(uniforms.mouse, m.x, m.y);
+          gl.uniform1f(uniforms.mouseStrength, m.strength);
 
-        // Render particles with ultra-high contrast, bold sizing & glowing neon red accents
-        for (let i = 0; i < projectedPoints.length; i++) {
-          const p = projectedPoints[i];
+          gl.clear(gl.COLOR_BUFFER_BIT);
+          gl.drawArrays(gl.POINTS, 0, numPoints);
 
-          // Alpha depth fading
-          const depthRatio = Math.max(0, Math.min(1, (1300 - p.z) / 1100));
-          if (depthRatio <= 0.05) continue;
-
-          if (p.isRed) {
-            // Codrix Signature Glowing Electric Blue Accent (#3B4CFF)
-            const pulse = 0.88 + Math.sin(time * 3.2 + p.pointIdx) * 0.22;
-            const radius = Math.max(1.2, p.scale * 2.2) * pulse;
-            const alpha = Math.min(1, depthRatio * 0.95);
-
-            ctx.save();
-            ctx.shadowColor = 'rgba(59, 76, 255, 0.9)';
-            ctx.shadowBlur = Math.max(5, 10 * p.scale);
-            ctx.fillStyle = `rgba(59, 76, 255, ${alpha})`;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-          } else {
-            // Delicate Micro White/Cream Matrix Dot (#F3F1EA)
-            const radius = Math.max(0.65, p.scale * 1.4);
-            const alpha = depthRatio * 0.45;
-
-            ctx.fillStyle = `rgba(243, 241, 234, ${alpha})`;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-
-        requestAnimationFrame(render);
+          requestAnimationFrame(render);
       }
+
+      window.addEventListener('resize', resize);
+      resize();
+      
+      const targetSection = document.querySelector(sectionSelector) || document.body;
+      targetSection.addEventListener("pointermove", (e) => {
+          const rect = targetSection.getBoundingClientRect();
+          const inside = e.clientY >= rect.top && e.clientY <= rect.bottom;
+          state.mouse.target = inside ? 1 : 0;
+          if (inside) {
+              state.mouse.tx = (e.clientX - rect.left) / rect.width * 2 - 1;
+              state.mouse.ty = -((e.clientY - rect.top) / rect.height * 2 - 1);
+          }
+      }, { passive: true });
+      targetSection.addEventListener("pointerleave", () => state.mouse.target = 0);
+
+      window.addEventListener('scroll', () => {
+          const maxScroll = window.innerHeight * 2.2;
+          const progress = Math.min(Math.max(window.scrollY / maxScroll, 0), 1);
+          state.scroll = progress;
+      }, { passive: true });
 
       requestAnimationFrame(render);
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initFraxbitHeroCanvas);
-    } else {
-      initFraxbitHeroCanvas();
+    function initAllCanvases() {
+      initFraxbitCanvas('fraxbit-hero-canvas', '#hero', 1);
+      initFraxbitCanvas('fraxbit-footer-canvas', '.footer-premium', -1);
     }
-    window.addEventListener('load', initFraxbitHeroCanvas);
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAllCanvases);
+    } else {
+      initAllCanvases();
+    }
+    window.addEventListener('load', initAllCanvases);

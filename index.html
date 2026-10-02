@@ -92,156 +92,6 @@
     <div class="hero-center-layout">
       <div class="hero-canvas-wrap" aria-hidden="true">
         <canvas id="fraxbit-hero-canvas"></canvas>
-        <script>
-          (function() {
-            const canvas = document.getElementById('fraxbit-hero-canvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
-
-            let width = 0, height = 0, dpr = 1;
-            const cols = 160, rows = 80;
-
-            let mouseX = 0, mouseY = 0, targetMouseX = 0, targetMouseY = 0, isMouseOver = false;
-            const blueDotSet = new Set();
-            const totalPoints = cols * rows;
-            let seed = 1337;
-            function pseudoRandom() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
-            for (let i = 0; i < Math.floor(totalPoints * 0.05); i++) { blueDotSet.add(Math.floor(pseudoRandom() * totalPoints)); }
-
-            // Ambient background floating starburst dots across full screen
-            const ambientDots = [];
-            for (let i = 0; i < 90; i++) {
-              ambientDots.push({
-                xRatio: pseudoRandom() * 1.4 - 0.2,
-                yRatio: pseudoRandom() * 1.2 - 0.1,
-                size: 0.6 + pseudoRandom() * 1.8,
-                speed: 0.2 + pseudoRandom() * 0.6,
-                isBlue: pseudoRandom() < 0.35,
-                phase: pseudoRandom() * Math.PI * 2
-              });
-            }
-
-            function resize() {
-              width = window.innerWidth;
-              height = window.innerHeight;
-              dpr = Math.min(window.devicePixelRatio || 1, 2);
-              canvas.width = width * dpr;
-              canvas.height = height * dpr;
-              canvas.style.width = width + 'px';
-              canvas.style.height = height + 'px';
-              ctx.scale(dpr, dpr);
-            }
-            resize();
-            window.addEventListener('resize', resize, { passive: true });
-
-            const heroSection = document.getElementById('hero') || document.body;
-            heroSection.addEventListener('mousemove', (e) => {
-              const rect = heroSection.getBoundingClientRect();
-              targetMouseX = e.clientX - rect.left - width / 2;
-              targetMouseY = e.clientY - rect.top - height / 2;
-              isMouseOver = true;
-            }, { passive: true });
-
-            heroSection.addEventListener('mouseleave', () => { targetMouseX = 0; targetMouseY = 0; isMouseOver = false; }, { passive: true });
-
-            let time = 0;
-            function render() {
-              time += 0.022;
-              mouseX += (targetMouseX - mouseX) * 0.05;
-              mouseY += (targetMouseY - mouseY) * 0.05;
-              ctx.clearRect(0, 0, width, height);
-
-              // 1. Ambient Floating Starburst Dots across full background space
-              for (let i = 0; i < ambientDots.length; i++) {
-                const ad = ambientDots[i];
-                const pulse = 0.5 + Math.sin(time * ad.speed + ad.phase) * 0.5;
-                const ax = ad.xRatio * width + Math.sin(time * 0.3 + ad.phase) * 20;
-                const ay = ad.yRatio * height + Math.cos(time * 0.4 + ad.phase) * 15;
-                const alpha = Math.max(0.1, pulse * 0.65);
-
-                ctx.beginPath();
-                ctx.arc(ax, ay, ad.size, 0, Math.PI * 2);
-                if (ad.isBlue) {
-                  ctx.fillStyle = `rgba(59, 76, 255, ${alpha})`;
-                  ctx.shadowColor = 'rgba(59, 76, 255, 0.8)';
-                  ctx.shadowBlur = 6;
-                } else {
-                  ctx.fillStyle = `rgba(243, 241, 234, ${alpha * 0.7})`;
-                  ctx.shadowBlur = 0;
-                }
-                ctx.fill();
-              }
-              ctx.shadowBlur = 0;
-
-              // 2. 3D Wave Field Spanning 100% Full Viewport Width
-              const fov = 440;
-              const halfCols = cols / 2;
-              const spacingX = Math.max(22, (width * 2.3) / cols);
-              const spacingZ = 20;
-              const points = [];
-
-              for (let r = 0; r < rows; r++) {
-                for (let c = 0; c < cols; c++) {
-                  const pointIdx = r * cols + c;
-                  const posX = (c - halfCols) * spacingX;
-                  const posZ = r * spacingZ + 80;
-
-                  const wave1 = Math.sin(c * 0.09 + time * 1.1) * Math.cos(r * 0.09 + time * 0.9) * 36;
-                  const wave2 = Math.sin((c + r) * 0.05 + time * 0.7) * 18;
-                  let posY = wave1 + wave2;
-
-                  if (isMouseOver) {
-                    const dx = posX - mouseX;
-                    const dz = posZ - (mouseY + 280);
-                    const distSq = dx * dx + dz * dz;
-                    if (distSq < 220 * 220) {
-                      const factor = 1 - distSq / (220 * 220);
-                      posY -= Math.sin(factor * Math.PI) * 45;
-                    }
-                  }
-
-                  const z3d = posZ + (mouseY * 0.12);
-                  const scale = fov / (fov + z3d);
-                  const screenX = width / 2 + (posX + mouseX * 0.15) * scale;
-                  const screenY = height * 0.58 + (posY + (r * 12) - 280) * scale;
-
-                  if (screenX < -50 || screenX > width + 50 || screenY < -50 || screenY > height + 50) continue;
-
-                  points.push({ x: screenX, y: screenY, scale: scale, z: z3d, isBlue: blueDotSet.has(pointIdx), idx: pointIdx });
-                }
-              }
-
-              points.sort((a, b) => b.z - a.z);
-
-              for (let i = 0; i < points.length; i++) {
-                const p = points[i];
-                const depthAlpha = Math.max(0.1, Math.min(0.9, (1700 - p.z) / 1400));
-
-                if (p.isBlue) {
-                  const pulse = 0.88 + Math.sin(time * 3.2 + p.idx) * 0.22;
-                  const radius = Math.max(1.2, p.scale * 2.4) * pulse;
-                  ctx.save();
-                  ctx.shadowColor = 'rgba(59, 76, 255, 0.9)';
-                  ctx.shadowBlur = Math.max(5, 10 * p.scale);
-                  ctx.fillStyle = `rgba(59, 76, 255, ${depthAlpha * 0.95})`;
-                  ctx.beginPath();
-                  ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-                  ctx.fill();
-                  ctx.restore();
-                } else {
-                  const radius = Math.max(0.65, p.scale * 1.5);
-                  ctx.fillStyle = `rgba(243, 241, 234, ${depthAlpha * 0.5})`;
-                  ctx.beginPath();
-                  ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-                  ctx.fill();
-                }
-              }
-              requestAnimationFrame(render);
-            }
-            requestAnimationFrame(render);
-          })();
-        </script>
       </div>
       <div class="hero-we-are" style="animation: fade-in 1s ease-out 1s forwards; opacity: 0;"><div class="ui-left" style="will-change: transform, opacity;">WE ARE</div></div>
       
@@ -458,76 +308,127 @@
         </div>
         <p>Hover to explore each capability &mdash; no filler services, only things we deliver.</p>
       </div>
-      <div class="skills-grid">
-        <div class="skill-card reveal">
-          <div class="skill-inner">
-            <div class="skill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.8">
-                <polyline points="16 18 22 12 16 6" />
-                <polyline points="8 6 2 12 8 18" />
-              </svg></div>
-            <h3>Premium Web Design</h3>
-            <p>Beautiful, conversion-focused interfaces engineered for modern brands. We prioritize aesthetics, usability, and lightning-fast load times.</p>
-            <div class="skill-tags"><span>Figma</span><span>UI/UX</span><span>Framer</span><span>Webflow</span></div>
+      <div class="capabilities-container">
+        <!-- Row 1 -->
+        <div class="cap-row">
+          <div class="cap-num">01</div>
+          <div class="cap-title-col">
+            <h2 class="cap-title"><span class="cap-dot"></span>Premium Web Design</h2>
+            <p class="cap-subtitle">Beautiful, conversion-focused interfaces engineered for modern brands. We prioritize aesthetics, usability, and lightning-fast load times.</p>
+          </div>
+          <div class="cap-list">
+            <span>Figma</span>
+            <span>UI/UX</span>
+            <span>Framer</span>
+            <span>Webflow</span>
+          </div>
+          <div class="cap-action">
+            <a href="#work" class="cap-btn magnetic">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
           </div>
         </div>
-        <div class="skill-card reveal reveal-delay-1">
-          <div class="skill-inner">
-            <div class="skill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <rect x="2" y="3" width="20" height="14" rx="2" />
-                <path d="M8 21h8M12 17v4M7 8h10M7 12h6" />
-              </svg></div>
-            <h3>Custom Web Development</h3>
-            <p>Scalable frontend and backend architectures tailored to your business needs, built entirely from scratch without bloated templates.</p>
-            <div class="skill-tags"><span>React</span><span>Next.js</span><span>Node.js</span><span>Tailwind CSS</span></div>
+        
+        <!-- Row 2 -->
+        <div class="cap-row">
+          <div class="cap-num">02</div>
+          <div class="cap-title-col">
+            <h2 class="cap-title"><span class="cap-dot"></span>Custom Web Development</h2>
+            <p class="cap-subtitle">Scalable frontend and backend architectures tailored to your business needs, built entirely from scratch without bloated templates.</p>
+          </div>
+          <div class="cap-list">
+            <span>React</span>
+            <span>Next.js</span>
+            <span>Node.js</span>
+            <span>Tailwind CSS</span>
+          </div>
+          <div class="cap-action">
+            <a href="#work" class="cap-btn magnetic">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
           </div>
         </div>
-        <div class="skill-card reveal reveal-delay-2">
-          <div class="skill-inner">
-            <div class="skill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="3" y1="9" x2="21" y2="9"></line>
-                <line x1="9" y1="21" x2="9" y2="9"></line>
-              </svg></div>
-            <h3>Power BI Dashboards</h3>
-            <p>Transform raw data into interactive, real-time Power BI dashboards. We build visual narratives that drive executive decision-making.</p>
-            <div class="skill-tags"><span>Power BI</span><span>DAX</span><span>Data Modeling</span><span>Power Query</span></div>
+        
+        <!-- Row 3 -->
+        <div class="cap-row">
+          <div class="cap-num">03</div>
+          <div class="cap-title-col">
+            <h2 class="cap-title"><span class="cap-dot"></span>Power BI Dashboards</h2>
+            <p class="cap-subtitle">Transform raw data into interactive, real-time Power BI dashboards. We build visual narratives that drive executive decision-making.</p>
+          </div>
+          <div class="cap-list">
+            <span>Power BI</span>
+            <span>DAX</span>
+            <span>Data Modeling</span>
+            <span>Power Query</span>
+          </div>
+          <div class="cap-action">
+            <a href="#work" class="cap-btn magnetic">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
           </div>
         </div>
-        <div class="skill-card reveal reveal-delay-1">
-          <div class="skill-inner">
-            <div class="skill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <line x1="18" y1="20" x2="18" y2="10"></line>
-                <line x1="12" y1="20" x2="12" y2="4"></line>
-                <line x1="6" y1="20" x2="6" y2="14"></line>
-              </svg></div>
-            <h3>Data Analytics & Strategy</h3>
-            <p>We clean, structure, and analyze complex datasets, turning spreadsheets into clear, actionable business intelligence insights.</p>
-            <div class="skill-tags"><span>SQL</span><span>ETL</span><span>Python</span><span>Analytics</span></div>
+
+        <!-- Row 4 -->
+        <div class="cap-row">
+          <div class="cap-num">04</div>
+          <div class="cap-title-col">
+            <h2 class="cap-title"><span class="cap-dot"></span>Data Analytics & Strategy</h2>
+            <p class="cap-subtitle">We clean, structure, and analyze complex datasets, turning spreadsheets into clear, actionable business intelligence insights.</p>
+          </div>
+          <div class="cap-list">
+            <span>SQL</span>
+            <span>ETL</span>
+            <span>Python</span>
+            <span>Analytics</span>
+          </div>
+          <div class="cap-action">
+            <a href="#contact" class="cap-btn magnetic">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
           </div>
         </div>
-        <div class="skill-card reveal reveal-delay-2">
-          <div class="skill-inner">
-            <div class="skill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
-                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
-              </svg></div>
-            <h3>Data Visualization</h3>
-            <p>Custom charts, graphs, and interactive visualizations that communicate complex data simply and effectively.</p>
-            <div class="skill-tags"><span>D3.js</span><span>Chart.js</span><span>Recharts</span><span>BI Tools</span></div>
+        
+        <!-- Row 5 -->
+        <div class="cap-row">
+          <div class="cap-num">05</div>
+          <div class="cap-title-col">
+            <h2 class="cap-title"><span class="cap-dot"></span>Data Visualization</h2>
+            <p class="cap-subtitle">Custom charts, graphs, and interactive visualizations that communicate complex data simply and effectively.</p>
+          </div>
+          <div class="cap-list">
+            <span>D3.js</span>
+            <span>Chart.js</span>
+            <span>Recharts</span>
+            <span>BI Tools</span>
+          </div>
+          <div class="cap-action">
+            <a href="#contact" class="cap-btn magnetic">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
           </div>
         </div>
-        <div class="skill-card reveal reveal-delay-3">
-          <div class="skill-inner">
-            <div class="skill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg></div>
-            <h3>API & Data Integrations</h3>
-            <p>Connect your web applications directly to your Power BI data pipelines, CRMs, and third-party tools for automated workflows.</p>
-            <div class="skill-tags"><span>REST APIs</span><span>Webhooks</span><span>GraphQL</span><span>Zapier</span></div>
+
+        <!-- Row 6 -->
+        <div class="cap-row">
+          <div class="cap-num">06</div>
+          <div class="cap-title-col">
+            <h2 class="cap-title"><span class="cap-dot"></span>API & Data Integrations</h2>
+            <p class="cap-subtitle">Connect your web applications directly to your Power BI data pipelines, CRMs, and third-party tools for automated workflows.</p>
+          </div>
+          <div class="cap-list">
+            <span>REST APIs</span>
+            <span>Webhooks</span>
+            <span>GraphQL</span>
+            <span>Zapier</span>
+          </div>
+          <div class="cap-action">
+            <a href="#contact" class="cap-btn magnetic">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
           </div>
         </div>
+
       </div>
     </div>
   </section>
@@ -784,7 +685,7 @@
             
             <div class="cp-info-block">
               <span class="cp-eyebrow">WhatsApp</span>
-              <a href="https://wa.me/919980350691" target="_blank" class="cp-email" style="font-size: 16px; border:none; padding:0;">+91 9980350691</a>
+              <a href="https://wa.me/919980350691" target="_blank" class="cp-email" style="font-size: 16px; border:none; padding:0;">Message us</a>
             </div>
 
             <div class="cp-info-block">
@@ -888,8 +789,9 @@
   </section>
 
   <!-- FOOTER -->
-  <footer class="footer-premium">
-    <div class="wrap">
+  <footer class="footer-premium" style="position: relative; overflow: hidden;">
+    <canvas id="fraxbit-footer-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;"></canvas>
+    <div class="wrap" style="position: relative; z-index: 1;">
 
 
       <div class="footer-main-content">
