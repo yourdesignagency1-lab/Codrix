@@ -602,7 +602,7 @@
     })();
 
     /* FRAXBIT-STYLE 3D PARTICLE MATRIX WAVE ANIMATION (ULTRA-HIGH CONTRAST & DENSITY) */
-    (function initFraxbitHeroCanvas() {
+    function initFraxbitHeroCanvas() {
       const canvas = document.getElementById('fraxbit-hero-canvas');
       if (!canvas) return;
 
@@ -820,4 +820,11 @@
       }
 
       requestAnimationFrame(render);
-    })();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initFraxbitHeroCanvas);
+    } else {
+      initFraxbitHeroCanvas();
+    }
+    window.addEventListener('load', initFraxbitHeroCanvas);

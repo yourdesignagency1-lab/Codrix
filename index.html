@@ -90,6 +90,9 @@
     <div class="hero-glow" aria-hidden="true"></div>
 
     <div class="hero-center-layout">
+      <div class="hero-canvas-wrap" aria-hidden="true">
+        <canvas id="fraxbit-hero-canvas"></canvas>
+      </div>
       <div class="hero-we-are" style="animation: fade-in 1s ease-out 1s forwards; opacity: 0;"><div class="ui-left" style="will-change: transform, opacity;">WE ARE</div></div>
       
       <div class="hero-massive-wrap">
@@ -615,99 +618,99 @@
   </section>
 
   <!-- CONTACT -->
-  <section id="contact">
-    <div class="wrap">
-      <div class="contact-layout">
-
+  <section id="contact" class="contact-premium-section">
+    <div class="wrap" style="max-width: 1600px; padding: 0 4vw;">
+      <div class="contact-premium-layout">
+        
         <!-- Left: info -->
-        <div class="contact-left">
-          <div class="eyebrow" style="margin-bottom:16px"><span class="eyebrow-dot"></span>Let's build</div>
-          <h2>Got something<br>to ship?</h2>
-          <p>Tell us what you're building &mdash; we'll reply within one business day with a clear scope, honest timeline, and a fixed price. No pitch decks. No NDA before a quote.</p>
+        <div class="contact-premium-left">
+          <div class="cp-left-top">
+            <div class="eyebrow" style="margin-bottom:16px; color:rgba(255,255,255,0.7);"><span class="eyebrow-dot" style="background:#fff;"></span>Let's build</div>
+            <h2 class="cp-heading" style="margin-top:20px;">Got something<br>to ship?</h2>
+            <p class="cp-desc">Tell us what you're building &mdash; we'll reply within one business day with a clear scope, honest timeline, and a fixed price. No pitch decks. No NDA before a quote.</p>
+          </div>
+          
+          <div class="cp-left-bottom" style="flex-wrap: wrap;">
+            
+            <div class="cp-info-block">
+              <span class="cp-eyebrow">WhatsApp</span>
+              <a href="https://wa.me/919980350691" target="_blank" class="cp-email" style="font-size: 16px; border:none; padding:0;">+91 9980350691</a>
+            </div>
 
-          <div class="contact-info-list">
-            <div class="contact-info-item">
-              <div class="contact-info-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <div class="cp-info-block">
+              <span class="cp-eyebrow">Email</span>
+              <div class="cp-email-row">
+                <a href="mailto:codrixtechnology@gmail.com" class="cp-email" style="font-size: 16px;">codrixtechnology@gmail.com</a>
+                <button class="cp-copy-btn" onclick="navigator.clipboard.writeText('codrixtechnology@gmail.com'); this.innerText='COPIED'; setTimeout(() => this.innerText='COPY', 2000);">COPY</button>
               </div>
-              <span><strong>WhatsApp</strong>+91 9980350691</span>
             </div>
-            <div class="contact-info-item">
-              <div class="contact-info-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+
+            <div class="cp-info-block">
+              <span class="cp-eyebrow">Response time</span>
+              <div class="cp-status">
+                <span class="status-dot"></span>
+                Within 1 business day
               </div>
-              <span><strong>Email</strong>codrixtechnology@gmail.com</span>
             </div>
-            <div class="contact-info-item">
-              <div class="contact-info-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              </div>
-              <span><strong>Response time</strong>Within 1 business day</span>
-            </div>
+
           </div>
         </div>
 
         <!-- Right: form -->
-        <div class="contact-form-wrap">
-          <form id="contactForm" novalidate>
-            <div class="cf-row">
-              <div class="cf-group">
-                <label for="cf-name">Your name</label>
-                <input type="text" inputmode="text" id="cf-name" name="name" placeholder="Ravi Kumar" required autocomplete="name">
-              </div>
-              <div class="cf-group">
-                <label for="cf-email">Email</label>
-                <input type="email" inputmode="email" id="cf-email" name="email" placeholder="ravi@company.in" required autocomplete="email">
-              </div>
-            </div>
-            <div class="cf-group custom-select-group" id="cf-project-wrapper">
-              <label>Project type</label>
-              <input type="hidden" id="cf-project" name="project" value="">
-              <div class="custom-select-trigger" tabindex="0">
-                <span id="cf-project-text">Select one&hellip;</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A3A198" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
-              <ul class="custom-select-options" role="listbox">
-                <li role="option" data-value="Marketing website">Marketing website</li>
-                <li role="option" data-value="Power BI dashboard">Power BI dashboard</li>
-                <li role="option" data-value="Web application">Web application</li>
-                <li role="option" data-value="Landing page">Landing page</li>
-                <li role="option" data-value="Redesign / revamp">Redesign / revamp</li>
-                <li role="option" data-value="Automation / API">Automation / API</li>
-                <li role="option" data-value="Other">Other</li>
-              </ul>
-            </div>
+        <div class="contact-premium-right">
+          <div class="cp-form-card">
             
-            <div class="cf-group cf-honeypot" style="display:none;" aria-hidden="true">
-              <label for="cf-website">Leave this field empty</label>
-              <input type="text" id="cf-website" name="website" tabindex="-1" autocomplete="off">
-            </div>
+            <form id="contactForm" class="cp-form-premium" novalidate>
+              
+              <div class="cp-form-section">
+                <label>Project type</label>
+                <input type="hidden" id="cf-project" name="project" value="Marketing website">
+                <div class="cp-pills">
+                  <button type="button" class="cp-pill active" data-value="Marketing website" onclick="document.querySelectorAll('.cp-pill').forEach(p=>p.classList.remove('active')); this.classList.add('active'); document.getElementById('cf-project').value = this.dataset.value;">Marketing website</button>
+                  <button type="button" class="cp-pill" data-value="Power BI dashboard" onclick="document.querySelectorAll('.cp-pill').forEach(p=>p.classList.remove('active')); this.classList.add('active'); document.getElementById('cf-project').value = this.dataset.value;">Power BI dashboard</button>
+                  <button type="button" class="cp-pill" data-value="Web application" onclick="document.querySelectorAll('.cp-pill').forEach(p=>p.classList.remove('active')); this.classList.add('active'); document.getElementById('cf-project').value = this.dataset.value;">Web application</button>
+                  <button type="button" class="cp-pill" data-value="Landing page" onclick="document.querySelectorAll('.cp-pill').forEach(p=>p.classList.remove('active')); this.classList.add('active'); document.getElementById('cf-project').value = this.dataset.value;">Landing page</button>
+                  <button type="button" class="cp-pill" data-value="Redesign / revamp" onclick="document.querySelectorAll('.cp-pill').forEach(p=>p.classList.remove('active')); this.classList.add('active'); document.getElementById('cf-project').value = this.dataset.value;">Redesign / revamp</button>
+                  <button type="button" class="cp-pill" data-value="Automation / API" onclick="document.querySelectorAll('.cp-pill').forEach(p=>p.classList.remove('active')); this.classList.add('active'); document.getElementById('cf-project').value = this.dataset.value;">Automation / API</button>
+                  <button type="button" class="cp-pill" data-value="Other" onclick="document.querySelectorAll('.cp-pill').forEach(p=>p.classList.remove('active')); this.classList.add('active'); document.getElementById('cf-project').value = this.dataset.value;">Other</button>
+                </div>
+              </div>
 
-            <div class="cf-group">
-              <label for="cf-message">Tell us about your project</label>
-              <textarea id="cf-message" name="message" placeholder="What are you building, what's the goal, and when do you need it?"></textarea>
-            </div>
-            
-            <div class="cf-group cf-consent">
-              <label class="consent-label">
-                <input type="checkbox" id="cf-consent" name="consent" required>
-                <span>I consent to Codrix processing my data according to the <a href="pages/privacy-policy.html">Privacy Policy</a>.</span>
-              </label>
-            </div>
-            
-            <button type="submit" class="cf-submit" id="cf-submit-btn">
-              <svg class="cf-wa-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              Send via WhatsApp
-            </button>
-            <p class="cf-note">Your details are compiled into a WhatsApp message &mdash; nothing is stored on any server.</p>
-          </form>
+              <div class="cp-row">
+                <div class="cp-input-group">
+                  <input type="text" id="cf-name" name="name" placeholder="Your name" required>
+                </div>
+                <div class="cp-input-group">
+                  <input type="email" id="cf-email" name="email" placeholder="Email" required>
+                </div>
+              </div>
 
-          <div class="cf-success" id="cfSuccess">
-            <div class="cf-success-icon">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <h3>Opening WhatsApp&hellip;</h3>
-            <p>Your message is pre-filled and ready to send. Just hit send in WhatsApp!</p>
+              <div class="cf-group cf-honeypot" style="display:none;" aria-hidden="true">
+                <input type="text" id="cf-website" name="website" tabindex="-1" autocomplete="off">
+              </div>
+
+              <div class="cp-input-group">
+                <input type="text" id="cf-message" name="message" placeholder="Tell us about your project" required>
+              </div>
+
+              <div class="cf-group cf-consent" style="margin-top: 10px;">
+                <label class="consent-label" style="color: #666; font-size:13px; display:flex; gap:8px;">
+                  <input type="checkbox" id="cf-consent" name="consent" required style="width:16px; height:16px; border:1px solid #ccc; flex-shrink:0;">
+                  <span>I consent to Codrix processing my data according to the <a href="pages/privacy-policy.html" style="color:#000;">Privacy Policy</a>.</span>
+                </label>
+              </div>
+
+              <button type="submit" class="cp-submit-btn" id="cf-submit-btn">
+                Send via WhatsApp
+                <span class="cp-submit-icon" style="background:var(--blue, #E62B46);"><svg class="cf-wa-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+              </button>
+
+              <div class="cf-success" id="cfSuccess" style="display:none; text-align:center; padding: 20px;">
+                <h3>Opening WhatsApp&hellip;</h3>
+                <p>Your message is pre-filled and ready to send.</p>
+              </div>
+
+            </form>
           </div>
         </div>
 
@@ -735,58 +738,68 @@
   </section>
 
   <!-- FOOTER -->
-  <footer>
+  <footer class="footer-premium">
     <div class="wrap">
-      <div class="footer-top">
-        <div class="footer-brand">
-          <a href="#" class="nav-logo" aria-label="Codrix Home">
-            <img src="assets/logo/logo.png" alt="Codrix Logo" class="nav-logo-img">
-          </a>
-          <p>A web design &amp; development agency engineering fast, custom websites for businesses in India and beyond.
+
+
+      <div class="footer-main-content">
+        <div class="footer-brand-info">
+          <p class="footer-desc">
+            A web design &amp; development agency engineering fast, custom websites for businesses in India and beyond.
           </p>
-        </div>
-        <div class="footer-col">
-          <h5>Company</h5>
-          <a href="#work">Work</a><a href="#skills">Skills</a><a href="#process">Process</a><a
-            href="#journal">Journal</a>
-        </div>
-        <div class="footer-col">
-          <h5>Services</h5>
-          <a href="#skills">Web Design</a><a href="#skills">Web Development</a><a href="#skills">Power BI</a><a
-            href="#skills">Web Applications</a>
-        </div>
-        <div class="footer-col">
-          <h5>Get in touch</h5>
-          <a href="https://wa.me/91XXXXXXXXXX" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-          <a href="mailto:codrixtechnology@gmail.com">codrixtechnology@gmail.com</a>
-          <a href="#faq">FAQ</a>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <div class="footer-legal">
-          <p>&copy; 2026 Codrix. All rights reserved.</p>
-          <div class="legal-links">
-            <a href="pages/privacy-policy.html">Privacy Policy</a>
-            <a href="pages/terms.html">Terms & Conditions</a>
+          <div class="footer-status">
+            <span class="status-dot"></span>
+            Available for work
           </div>
         </div>
-        <div class="social-row">
-          <a href="https://www.instagram.com/codrixtech?stkn=MWx0d2RhcnA3cGF0Zg==" class="social-link" aria-label="Instagram"><svg width="14" height="14" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-            </svg></a>
+        
+        <div class="footer-columns">
+          <div class="footer-col-premium">
+            <a href="#work">Work</a>
+            <a href="#skills">Skills</a>
+            <a href="#process">Process</a>
+            <a href="#journal">Journal</a>
+          </div>
+          <div class="footer-col-premium">
+            <a href="#skills">Web Design</a>
+            <a href="#skills">Web Development</a>
+            <a href="#skills">Power BI</a>
+            <a href="#skills">Web Applications</a>
+          </div>
+          <div class="footer-col-premium">
+            <a href="https://wa.me/919980350691" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a href="#faq">FAQ</a>
+            <a href="https://www.instagram.com/codrixtech?stkn=MWx0d2RhcnA3cGF0Zg==" target="_blank" rel="noopener noreferrer">Instagram</a>
+          </div>
         </div>
+      </div>
+
+      <div class="footer-divider"></div>
+      
+      <div class="footer-middle-premium">
+        <div class="footer-email-row">
+          <a href="mailto:codrixtechnology@gmail.com" class="footer-email">codrixtechnology@gmail.com</a>
+          <button class="footer-copy-btn" onclick="navigator.clipboard.writeText('codrixtechnology@gmail.com'); this.innerText='COPIED'; setTimeout(() => this.innerText='COPY', 2000);">COPY</button>
+        </div>
+        <a href="#contact" class="footer-discovery-link">Book a discovery call <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19L19 5M19 5v14M19 5H5" /></svg></a>
+      </div>
+
+      <div class="footer-massive-logo">
+        <img src="assets/logo/logo.png" alt="Codrix Massive Logo">
+      </div>
+
+      <div class="footer-bottom-premium">
+        <p>&copy; 2026 Codrix. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="pages/privacy-policy.html">Privacy & Terms</a>
+        </div>
+        <p class="footer-location">India 19:37</p>
+        <button id="footer-scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+          Back to top <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+        </button>
       </div>
     </div>
   </footer>
-
-  <button id="scroll-top" aria-label="Scroll to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <polyline points="18 15 12 9 6 15" />
-    </svg>
-  </button>
 
   
 
@@ -800,7 +813,7 @@
       <button id="cookie-accept" class="cookie-btn">Accept All</button>
     </div>
   </div>
-  <script src="js/main.js" defer></script>
+  <script src="js/main.js?v=99" defer></script>
 </body>
 
 </html>
