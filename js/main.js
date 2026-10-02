@@ -493,7 +493,9 @@
       /* CUSTOM DROPDOWN */
       (function() {
         const wrapper = document.getElementById('cf-project-wrapper');
+        if (!wrapper) return;
         const trigger = wrapper.querySelector('.custom-select-trigger');
+        if (!trigger) return;
         const textSpan = document.getElementById('cf-project-text');
         const options = wrapper.querySelectorAll('.custom-select-options li');
         const hiddenInput = document.getElementById('cf-project');
