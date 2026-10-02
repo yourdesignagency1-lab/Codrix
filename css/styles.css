@@ -916,7 +916,7 @@
       position: relative;
       z-index: 10;
       background: transparent;
-      margin-top: 220vh; /* Wait for video scale animation to finish */
+      margin-top: 100vh; /* Delays text until video is fully scaled */
     }
 
     #manifesto {
