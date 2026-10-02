@@ -791,25 +791,25 @@
           if (depthRatio <= 0.05) continue;
 
           if (p.isRed) {
-            // Fraxbit Signature Glowing Red Accent Dot
-            const pulse = 0.9 + Math.sin(time * 3.2 + p.pointIdx) * 0.25;
-            const radius = Math.max(2.8, p.scale * 4.8) * pulse;
-            const alpha = Math.min(1, depthRatio * 0.98);
+            // Codrix Signature Glowing Electric Blue Accent (#3B4CFF)
+            const pulse = 0.88 + Math.sin(time * 3.2 + p.pointIdx) * 0.22;
+            const radius = Math.max(1.2, p.scale * 2.2) * pulse;
+            const alpha = Math.min(1, depthRatio * 0.95);
 
             ctx.save();
-            ctx.shadowColor = 'rgba(255, 42, 75, 1)';
-            ctx.shadowBlur = Math.max(10, 18 * p.scale);
-            ctx.fillStyle = `rgba(255, 42, 75, ${alpha})`;
+            ctx.shadowColor = 'rgba(59, 76, 255, 0.9)';
+            ctx.shadowBlur = Math.max(5, 10 * p.scale);
+            ctx.fillStyle = `rgba(59, 76, 255, ${alpha})`;
             ctx.beginPath();
             ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
           } else {
-            // High-contrast crisp white/cyan matrix dot
-            const radius = Math.max(1.6, p.scale * 3.4);
-            const alpha = Math.min(0.92, Math.max(0.35, depthRatio * 0.9));
+            // Delicate Micro White/Cream Matrix Dot (#F3F1EA)
+            const radius = Math.max(0.65, p.scale * 1.4);
+            const alpha = depthRatio * 0.45;
 
-            ctx.fillStyle = `rgba(240, 246, 255, ${alpha})`;
+            ctx.fillStyle = `rgba(243, 241, 234, ${alpha})`;
             ctx.beginPath();
             ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
             ctx.fill();

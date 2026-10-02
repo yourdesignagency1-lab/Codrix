@@ -100,15 +100,15 @@
             if (!ctx) return;
 
             let width = 0, height = 0, dpr = 1;
-            const cols = 110, rows = 65;
-            const spacingX = 26, spacingZ = 24;
+            const cols = 150, rows = 75;
+            const spacingX = 18, spacingZ = 18;
 
             let mouseX = 0, mouseY = 0, targetMouseX = 0, targetMouseY = 0, isMouseOver = false;
-            const redDotSet = new Set();
+            const blueDotSet = new Set();
             const totalPoints = cols * rows;
             let seed = 1337;
             function pseudoRandom() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
-            for (let i = 0; i < Math.floor(totalPoints * 0.045); i++) { redDotSet.add(Math.floor(pseudoRandom() * totalPoints)); }
+            for (let i = 0; i < Math.floor(totalPoints * 0.045); i++) { blueDotSet.add(Math.floor(pseudoRandom() * totalPoints)); }
 
             function resize() {
               width = window.innerWidth;
@@ -135,7 +135,7 @@
 
             let time = 0;
             function render() {
-              time += 0.025;
+              time += 0.022;
               mouseX += (targetMouseX - mouseX) * 0.05;
               mouseY += (targetMouseY - mouseY) * 0.05;
               ctx.clearRect(0, 0, width, height);
@@ -148,30 +148,30 @@
                 for (let c = 0; c < cols; c++) {
                   const pointIdx = r * cols + c;
                   const posX = (c - halfCols) * spacingX;
-                  const posZ = r * spacingZ + 120;
+                  const posZ = r * spacingZ + 100;
 
-                  const wave1 = Math.sin(c * 0.12 + time * 1.2) * Math.cos(r * 0.12 + time * 1.0) * 38;
-                  const wave2 = Math.sin((c + r) * 0.08 + time * 0.8) * 20;
+                  const wave1 = Math.sin(c * 0.10 + time * 1.1) * Math.cos(r * 0.10 + time * 0.9) * 32;
+                  const wave2 = Math.sin((c + r) * 0.06 + time * 0.7) * 16;
                   let posY = wave1 + wave2;
 
                   if (isMouseOver) {
                     const dx = posX - mouseX;
-                    const dz = posZ - (mouseY + 300);
+                    const dz = posZ - (mouseY + 280);
                     const distSq = dx * dx + dz * dz;
-                    if (distSq < 200 * 200) {
-                      const factor = 1 - distSq / (200 * 200);
-                      posY -= Math.sin(factor * Math.PI) * 45;
+                    if (distSq < 180 * 180) {
+                      const factor = 1 - distSq / (180 * 180);
+                      posY -= Math.sin(factor * Math.PI) * 40;
                     }
                   }
 
-                  const z3d = posZ + (mouseY * 0.15);
+                  const z3d = posZ + (mouseY * 0.12);
                   const scale = fov / (fov + z3d);
-                  const screenX = width / 2 + (posX + mouseX * 0.2) * scale;
-                  const screenY = height * 0.52 + (posY + (r * 11) - 260) * scale;
+                  const screenX = width / 2 + (posX + mouseX * 0.15) * scale;
+                  const screenY = height * 0.54 + (posY + (r * 9) - 220) * scale;
 
                   if (screenX < -20 || screenX > width + 20 || screenY < -20 || screenY > height + 20) continue;
 
-                  points.push({ x: screenX, y: screenY, scale: scale, z: z3d, isRed: redDotSet.has(pointIdx), idx: pointIdx });
+                  points.push({ x: screenX, y: screenY, scale: scale, z: z3d, isBlue: blueDotSet.has(pointIdx), idx: pointIdx });
                 }
               }
 
@@ -179,22 +179,24 @@
 
               for (let i = 0; i < points.length; i++) {
                 const p = points[i];
-                const depthAlpha = Math.max(0.15, Math.min(0.95, (1600 - p.z) / 1200));
+                const depthAlpha = Math.max(0.08, Math.min(0.85, (1600 - p.z) / 1300));
 
-                if (p.isRed) {
-                  const pulse = 0.85 + Math.sin(time * 3.5 + p.idx) * 0.22;
-                  const radius = Math.max(2.5, p.scale * 4.2) * pulse;
+                if (p.isBlue) {
+                  // Codrix Signature Glowing Electric Blue Accent (#3B4CFF)
+                  const pulse = 0.88 + Math.sin(time * 3.2 + p.idx) * 0.22;
+                  const radius = Math.max(1.2, p.scale * 2.2) * pulse;
                   ctx.save();
-                  ctx.shadowColor = '#FF2A4B';
-                  ctx.shadowBlur = Math.max(8, 16 * p.scale);
-                  ctx.fillStyle = `rgba(255, 42, 75, ${depthAlpha})`;
+                  ctx.shadowColor = 'rgba(59, 76, 255, 0.9)';
+                  ctx.shadowBlur = Math.max(5, 10 * p.scale);
+                  ctx.fillStyle = `rgba(59, 76, 255, ${depthAlpha * 0.95})`;
                   ctx.beginPath();
                   ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
                   ctx.fill();
                   ctx.restore();
                 } else {
-                  const radius = Math.max(1.2, p.scale * 2.8);
-                  ctx.fillStyle = `rgba(235, 242, 255, ${depthAlpha * 0.85})`;
+                  // Delicate Micro White/Cream Matrix Dot (#F3F1EA)
+                  const radius = Math.max(0.65, p.scale * 1.4);
+                  ctx.fillStyle = `rgba(243, 241, 234, ${depthAlpha * 0.45})`;
                   ctx.beginPath();
                   ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
                   ctx.fill();
