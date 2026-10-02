@@ -465,7 +465,6 @@
     /* HERO (Scroll Track) */
     #hero {
       position: relative;
-      height: 320vh;
       background: radial-gradient(70% 55% at 50% 35%, rgba(59, 76, 255, 0.14) 0%, rgba(10, 11, 15, 0) 75%), #0A0B0F;
     }
 
@@ -916,7 +915,7 @@
       position: relative;
       z-index: 10;
       background: transparent;
-      margin-top: 100vh; /* Delays text until video is fully scaled */
+      margin-top: 120vh; /* Delays text until video is fully scaled and starts scaling down */
     }
 
     #manifesto {
