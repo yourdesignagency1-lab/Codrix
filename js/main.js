@@ -728,7 +728,7 @@
 
             // Base grid 3D position
             const posX = (c - halfCols) * spacingX;
-            const posZ = (r - halfRows) * spacingZ + 280; // Z offset
+            const posZ = (r - halfRows) * spacingZ; // Z offset
 
             // 3D Superposition Wave height Y formula
             const wave1 = Math.sin(posX * 0.009 + time * 1.2) * Math.cos(posZ * 0.009 + time * 1.0) * 44;
@@ -740,7 +740,7 @@
             // Interactive mouse displacement ripple
             if (isMouseOverHero) {
               const dx = posX - mouseX * 0.95;
-              const dz = posZ - (mouseY * 0.95 + 280);
+              const dz = posZ - (mouseY * 0.95);
               const distSq = dx * dx + dz * dz;
               const radiusSq = 250 * 250;
               if (distSq < radiusSq) {
@@ -753,17 +753,15 @@
             const x1 = posX * cosY - posZ * sinY;
             const z1 = posX * sinY + posZ * cosY;
 
-            const y2 = (posY - cameraY) * cosX - (z1 - cameraZ) * sinX;
-            const z2 = (posY - cameraY) * sinX + (z1 - cameraZ) * cosX;
-
-            if (z2 < 10) continue;
+            const z2 = (posY - cameraY) * sinX + (z1 - cameraZ) * cosX + 450;
+            if (z2 < 20) continue;
 
             // 3D to 2D Perspective Projection
             const scale = focalLength / z2;
-            const screenX = width / 2 + x1 * scale;
-            const screenY = height / 2 + y2 * scale;
+            const screenX = width / 2 + (x1 + mouseX * 0.15) * scale;
+            const screenY = height * 0.50 + (posY + (r * 11) - 300) * scale;
 
-            if (screenX < -30 || screenX > width + 30 || screenY < -30 || screenY > height + 30) {
+            if (screenX < -50 || screenX > width + 50 || screenY < -50 || screenY > height + 50) {
               continue;
             }
 
